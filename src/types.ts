@@ -12,6 +12,8 @@ export type BridgeConfig = {
   allowedUsers: string[];
   allowedGroups: string[];
   commandPrefix: string;
+  defaultProject?: string;
+  allowDirectPrivateMessage: boolean;
   defaultSandbox: SandboxMode;
   defaultReasoningEffort: ReasoningEffort;
   replyMaxChars: number;
@@ -23,6 +25,7 @@ export type ParsedCommand =
   | { kind: 'invalid'; reason: string }
   | { kind: 'run'; project: string; task: string }
   | { kind: 'status' }
+  | { kind: 'direct'; enabled: boolean }
   | { kind: 'session'; project: string }
   | { kind: 'new'; project: string }
   | { kind: 'attach'; project: string; threadId: string };
@@ -46,4 +49,7 @@ export type ProjectRuntimeState = {
 
 export type BridgeState = {
   projects: Record<string, ProjectRuntimeState>;
+  settings?: {
+    allowDirectPrivateMessage?: boolean;
+  };
 };

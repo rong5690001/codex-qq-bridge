@@ -29,6 +29,13 @@ describe('SessionStore', () => {
     expect(await store.getProject('doudou-puzzle')).toMatchObject({ lastRunId: 'run-1', status: 'running' });
   });
 
+  test('saves and reads runtime settings', async () => {
+    const store = new SessionStore(statePath);
+    expect(await store.getAllowDirectPrivateMessage()).toBeUndefined();
+    await store.setAllowDirectPrivateMessage(true);
+    expect(await store.getAllowDirectPrivateMessage()).toBe(true);
+  });
+
   test('throws a clear error for corrupt state JSON', async () => {
     await writeFile(statePath, '{not json', 'utf8');
     const store = new SessionStore(statePath);

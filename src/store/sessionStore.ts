@@ -28,7 +28,7 @@ export class SessionStore {
 
     try {
       const parsed = JSON.parse(raw) as BridgeState;
-      return { projects: parsed.projects ?? {} };
+      return { projects: parsed.projects ?? {}, settings: parsed.settings };
     } catch (error) {
       throw new Error(`Failed to parse bridge state at ${this.statePath}: ${(error as Error).message}`);
     }
@@ -57,6 +57,17 @@ export class SessionStore {
     const state = await this.read();
     const current = state.projects[project] ?? defaultProjectState();
     state.projects[project] = { ...current, lastRunId: runId, status, updatedAt: nowIso() };
+    await this.write(state);
+  }
+
+  async getAllowDirectPrivateMessage(): Promise<boolean | undefined> {
+    const state = await this.read();
+    return state.settings?.allowDirectPrivateMessage;
+  }
+
+  async setAllowDirectPrivateMessage(enabled: boolean): Promise<void> {
+    const state = await this.read();
+    state.settings = { ...state.settings, allowDirectPrivateMessage: enabled };
     await this.write(state);
   }
 }

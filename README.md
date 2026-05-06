@@ -91,7 +91,9 @@ vim config.json
   "hermes": { "command": "hermes", "args": ["mcp", "serve"] },
   "allowedUsers": ["<你的QQ号>"],
   "allowedGroups": [],
-  "commandPrefix": "/codex",
+  "commandPrefix": "cx",
+  "defaultProject": "doudou-puzzle",
+  "allowDirectPrivateMessage": false,
   "defaultSandbox": "workspace-write",
   "defaultReasoningEffort": "medium",
   "replyMaxChars": 3500,
@@ -113,7 +115,9 @@ vim config.json
 | `hermes.args` | Hermes MCP Server 启动参数。 |
 | `allowedUsers` | 允许触发 Codex 的 QQ 用户 ID。 |
 | `allowedGroups` | 允许触发 Codex 的 QQ 群 ID。 |
-| `commandPrefix` | QQ 指令前缀，默认 `/codex`。 |
+| `commandPrefix` | QQ 指令前缀，默认 `cx`。 |
+| `defaultProject` | 可选。省略项目名时使用的默认项目别名，必须存在于 `projects`。 |
+| `allowDirectPrivateMessage` | 是否允许白名单用户私聊免前缀直接发任务，默认 `false`。 |
 | `defaultSandbox` | Codex sandbox，当前固定为 `workspace-write`。 |
 | `defaultReasoningEffort` | Codex 推理强度：`low`、`medium`、`high`、`xhigh`。 |
 | `replyMaxChars` | QQ 单次回复最大字符数，超出会截断。 |
@@ -135,46 +139,67 @@ npm run dev -- --config ./config.json
 2. 启动并连接 Hermes MCP Server。
 3. 探测 Hermes 是否提供 `events_wait` / `events_poll` 和 `messages_send`。
 4. 循环监听消息。
-5. 对符合规则的 `/codex` 指令调用 Codex。
+5. 对符合规则的 `cx` 指令调用 Codex。
 
 ## QQ 指令
 
 ### 运行任务
 
 ```text
-/codex doudou-puzzle 修复构建报错
+cx 修复构建报错
 ```
 
 格式：
 
 ```text
-/codex <project> <task>
+cx <task>
+cx <project> <task>
 ```
+
+配置了 `defaultProject` 时，可以省略 `<project>`；显式写项目名时，仍优先使用指定项目。
+配置或运行时开启 `allowDirectPrivateMessage` 后，白名单用户私聊也可以直接发送任务文本；群聊仍需使用 `cx` 前缀。
 
 示例：
 
 ```text
-/codex doudou-puzzle 总结当前项目结构
-/codex doudou-puzzle 检查最近的测试失败原因
-/codex doudou-puzzle 优化 README 文档
+cx 总结当前项目结构
+cx doudou-puzzle 总结当前项目结构
+cx doudou-puzzle 检查最近的测试失败原因
+cx doudou-puzzle 优化 README 文档
 ```
+
+私聊免前缀示例：
+
+```text
+修复构建报错
+```
+
+### 切换私聊免前缀
+
+```text
+cx direct on
+cx direct off
+```
+
+该开关会写入运行时状态，重启后仍生效；未切换过时使用配置里的 `allowDirectPrivateMessage` 默认值。
 
 ### 查看运行状态
 
 ```text
-/codex status
+cx status
 ```
 
 如果没有任务运行，会返回：
 
 ```text
 当前没有正在运行的 Codex 任务。
+directPrivateMessage=on
 ```
 
 ### 查看项目 threadId
 
 ```text
-/codex session doudou-puzzle
+cx session doudou-puzzle
 ```
 
 返回当前项目绑定的 Codex `threadId`，并提示不要同时从 App/CLI 和 QQ bridge 操作同一个 thread。
@@ -182,7 +207,7 @@ npm run dev -- --config ./config.json
 ### 新建 Codex thread
 
 ```text
-/codex new doudou-puzzle
+cx new doudou-puzzle
 ```
 
 这会清空该项目当前保存的 `threadId`。下一次运行任务时，Codex 会创建新的 thread。
@@ -190,7 +215,7 @@ npm run dev -- --config ./config.json
 ### 绑定已有 Codex thread
 
 ```text
-/codex attach doudou-puzzle 019df6e5-5f84-7241-bd15-516a3e9704fc
+cx attach doudou-puzzle 019df6e5-5f84-7241-bd15-516a3e9704fc
 ```
 
 这会把已有 Codex App/CLI thread 绑定到项目。后续 QQ 指令会通过 `resumeThread()` 继续该 thread。
@@ -202,7 +227,7 @@ npm run dev -- --config ./config.json
 Codex SDK 使用本机 Codex exec，并基于 `~/.codex/sessions` 恢复会话。因此：
 
 - SDK 创建的 thread 理论上可以被 Codex CLI/App 通过 threadId 继续。
-- Codex CLI/App 中已有的 thread 也可以用 `/codex attach` 绑定给 bridge。
+- Codex CLI/App 中已有的 thread 也可以用 `cx attach` 绑定给 bridge。
 - App UI 不保证实时显示 SDK 新建的 thread。
 - 不要同时从 Codex App/CLI 和 QQ bridge 向同一个 `threadId` 发送消息。
 
@@ -288,7 +313,7 @@ src/
   index.ts                 入口，加载配置并启动守护循环
   bridge.ts                消息分发、策略校验、Codex 调用和回发
   config.ts                配置加载和校验
-  messageParser.ts         /codex 指令解析
+  messageParser.ts         cx 指令解析
   codex/codexProvider.ts   Codex SDK startThread/resumeThread 封装
   hermes/hermesClient.ts   Hermes MCP client 封装
   policy/policy.ts         白名单、危险请求、运行锁
@@ -330,7 +355,7 @@ hermes mcp serve
 
 1. QQ 账号是否在 `allowedUsers` 中。
 2. 群号是否在 `allowedGroups` 中。
-3. 消息是否以 `/codex` 开头。
+3. 消息是否以 `cx` 开头。
 4. Hermes 是否实际收到 QQ 消息。
 
 ### Codex 认证失败
@@ -347,7 +372,7 @@ codex exec "hello"
 可能是同时从 QQ bridge 和 Codex App/CLI 操作了同一个 thread。建议：
 
 ```text
-/codex new doudou-puzzle
+cx new doudou-puzzle
 ```
 
 然后重新开始一个 thread。

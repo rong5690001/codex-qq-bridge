@@ -4,7 +4,7 @@ export function truncateReply(text: string, maxChars: number): string {
 }
 
 export function formatSession(project: string, threadId: string): string {
-  if (!threadId) return `项目 ${project} 还没有绑定 Codex thread。发送任务或使用 /codex attach ${project} <threadId>。`;
+  if (!threadId) return `项目 ${project} 还没有绑定 Codex thread。发送任务或使用 cx attach ${project} <threadId>。`;
   return [
     `项目 ${project} 的 Codex threadId：`,
     threadId,

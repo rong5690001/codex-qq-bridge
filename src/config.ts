@@ -6,7 +6,9 @@ const ConfigSchema = z.object({
   hermes: z.object({ command: z.string().min(1), args: z.array(z.string()).default([]) }),
   allowedUsers: z.array(z.string()),
   allowedGroups: z.array(z.string()).default([]),
-  commandPrefix: z.string().min(1).default('/codex'),
+  commandPrefix: z.string().min(1).default('cx'),
+  defaultProject: z.string().min(1).optional(),
+  allowDirectPrivateMessage: z.boolean().default(false),
   defaultSandbox: z.literal('workspace-write').default('workspace-write'),
   defaultReasoningEffort: z.enum(['low', 'medium', 'high', 'xhigh']).default('medium'),
   replyMaxChars: z.number().int().positive().default(3500),
@@ -15,6 +17,14 @@ const ConfigSchema = z.object({
     threadId: z.string().default(''),
     sharedWithCodexApp: z.boolean().default(true)
   }))
+}).superRefine((config, context) => {
+  if (config.defaultProject && !config.projects[config.defaultProject]) {
+    context.addIssue({
+      code: 'custom',
+      path: ['defaultProject'],
+      message: `defaultProject must match a configured project: ${config.defaultProject}`
+    });
+  }
 });
 
 export async function loadConfig(path: string): Promise<BridgeConfig> {

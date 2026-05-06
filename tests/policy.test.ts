@@ -7,6 +7,7 @@ const config: BridgeConfig = {
   allowedUsers: ['10001'],
   allowedGroups: ['20001'],
   commandPrefix: '/codex',
+  allowDirectPrivateMessage: false,
   defaultSandbox: 'workspace-write',
   defaultReasoningEffort: 'medium',
   replyMaxChars: 3500,

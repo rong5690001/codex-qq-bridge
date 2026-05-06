@@ -21,7 +21,8 @@ export class BridgeApp {
   ) {}
 
   async handleMessage(message: IncomingMessage): Promise<void> {
-    const parsed = parseCommand(message.text, this.config.commandPrefix);
+    const directEnabled = await this.directPrivateMessageEnabled();
+    const parsed = this.parseMessage(message, directEnabled);
     if (parsed.kind === 'ignored') return;
 
     const project = projectOf(parsed);
@@ -39,15 +40,42 @@ export class BridgeApp {
     await this.dispatch(parsed, message);
   }
 
+  private parseMessage(message: IncomingMessage, directEnabled: boolean): ParsedCommand {
+    const parsed = parseCommand(message.text, this.config.commandPrefix, {
+      defaultProject: this.config.defaultProject,
+      projectAliases: Object.keys(this.config.projects)
+    });
+    if (parsed.kind !== 'ignored') return parsed;
+
+    if (!directEnabled || message.groupId || !this.config.defaultProject) {
+      return parsed;
+    }
+
+    const task = message.text.trim();
+    if (!task) return { kind: 'ignored' };
+    return { kind: 'run', project: this.config.defaultProject, task };
+  }
+
+  private async directPrivateMessageEnabled(): Promise<boolean> {
+    return (await this.store.getAllowDirectPrivateMessage()) ?? this.config.allowDirectPrivateMessage;
+  }
+
   async statusText(): Promise<string> {
     const active = this.lock.active();
-    if (active.length === 0) return '当前没有正在运行的 Codex 任务。';
-    return `正在运行：${active.join(', ')}`;
+    const directStatus = `directPrivateMessage=${(await this.directPrivateMessageEnabled()) ? 'on' : 'off'}`;
+    if (active.length === 0) return `当前没有正在运行的 Codex 任务。\n${directStatus}`;
+    return `正在运行：${active.join(', ')}\n${directStatus}`;
   }
 
   private async dispatch(command: Exclude<ParsedCommand, { kind: 'ignored' | 'invalid' }>, message: IncomingMessage): Promise<void> {
     if (command.kind === 'status') {
       await this.hermes.sendMessage(message.conversationId, await this.statusText());
+      return;
+    }
+
+    if (command.kind === 'direct') {
+      await this.store.setAllowDirectPrivateMessage(command.enabled);
+      await this.hermes.sendMessage(message.conversationId, `directPrivateMessage=${command.enabled ? 'on' : 'off'}`);
       return;
     }
 
