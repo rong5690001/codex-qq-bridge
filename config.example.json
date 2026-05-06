@@ -1,0 +1,16 @@
+{
+  "hermes": { "command": "hermes", "args": ["mcp", "serve"] },
+  "allowedUsers": ["<你的QQ号>"],
+  "allowedGroups": [],
+  "commandPrefix": "/codex",
+  "defaultSandbox": "workspace-write",
+  "defaultReasoningEffort": "medium",
+  "replyMaxChars": 3500,
+  "projects": {
+    "doudou-puzzle": {
+      "cwd": "/Users/rong/workspace/doudou-puzzle",
+      "threadId": "",
+      "sharedWithCodexApp": true
+    }
+  }
+}
