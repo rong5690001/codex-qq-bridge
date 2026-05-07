@@ -66,7 +66,7 @@ hermes mcp serve
 ## 安装
 
 ```bash
-cd /Users/rong/workspace/codex-qq-bridge
+cd /path/to/codex-qq-bridge
 npm install
 ```
 
@@ -99,7 +99,7 @@ vim config.json
   "replyMaxChars": 3500,
   "projects": {
     "doudou-puzzle": {
-      "cwd": "/Users/rong/workspace/doudou-puzzle",
+      "cwd": "/path/to/your/project",
       "threadId": "",
       "sharedWithCodexApp": true
     }
@@ -129,7 +129,7 @@ vim config.json
 ## 启动
 
 ```bash
-cd /Users/rong/workspace/codex-qq-bridge
+cd /path/to/codex-qq-bridge
 npm run dev -- --config ./config.json
 ```
 

@@ -10,7 +10,7 @@
   "replyMaxChars": 3500,
   "projects": {
     "doudou-puzzle": {
-      "cwd": "/Users/rong/workspace/doudou-puzzle",
+      "cwd": "/path/to/your/project",
       "threadId": "",
       "sharedWithCodexApp": true
     }

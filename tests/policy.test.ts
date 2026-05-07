@@ -13,7 +13,7 @@ const config: BridgeConfig = {
   replyMaxChars: 3500,
   projects: {
     'doudou-puzzle': {
-      cwd: '/Users/rong/workspace/doudou-puzzle',
+      cwd: '/tmp/doudou-puzzle',
       threadId: '',
       sharedWithCodexApp: true
     }

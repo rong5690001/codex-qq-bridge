@@ -20,7 +20,7 @@ const config: BridgeConfig = {
   replyMaxChars: 3500,
   projects: {
     'doudou-puzzle': {
-      cwd: '/Users/rong/workspace/doudou-puzzle',
+      cwd: '/tmp/doudou-puzzle',
       threadId: '',
       sharedWithCodexApp: true
     }
@@ -58,7 +58,7 @@ describe('BridgeApp', () => {
 
     expect(sendMessage).toHaveBeenCalledWith('conv-1', expect.stringContaining('已接收任务'));
     expect(sendMessage).toHaveBeenLastCalledWith('conv-1', expect.stringContaining('任务完成：doudou-puzzle'));
-    expect(codex.run).toHaveBeenCalledWith(expect.objectContaining({ cwd: '/Users/rong/workspace/doudou-puzzle', threadId: '' }));
+    expect(codex.run).toHaveBeenCalledWith(expect.objectContaining({ cwd: '/tmp/doudou-puzzle', threadId: '' }));
     expect((await store.getProject('doudou-puzzle')).threadId).toBe('019df6e5-5f84-7241-bd15-516a3e9704fc');
   });
 
@@ -84,7 +84,7 @@ describe('BridgeApp', () => {
 
     expect(sendMessage).toHaveBeenLastCalledWith('conv-1', expect.stringContaining('任务完成：doudou-puzzle'));
     expect(codex.run).toHaveBeenCalledWith(expect.objectContaining({
-      cwd: '/Users/rong/workspace/doudou-puzzle',
+      cwd: '/tmp/doudou-puzzle',
       task: '[Remote QQ message from allowed sender 10001]\nhello'
     }));
   });
